@@ -1,34 +1,39 @@
 import { useState } from "react"
-
-const TURNS = {
-  X: 'x',
-  O: 'o'
-}
-
-
-
-const Square = ({ children, isSelected, updateBoard, index}) => {
-  const className = `square ${isSelected ? 'is-selected' : ''}`
-  
-  const handleClick = () => {
-    updateBoard(index)
-  }
-
-  return (
-    <div onClick={handleClick} className={className}>
-      {children}
-    </div>
-  )
-}
+import confetti from "canvas-confetti"
+import { Square } from "./components/Square"
+import { TURNS } from "./constants"
+import { checkWinnerFrom, checkEndGame } from "./logic/board"
+import { WinnerModal } from "./components/WinnerModal"
+import { saveGameStorage, resetGameStorage } from "./logic/storage"
 
 function App() {
-  const [board, setBoard] = useState(Array(9).fill(null))
+  const [board, setBoard] = useState(() => {
+    const boardFromStorage = window.localStorage.getItem('board')
+    return boardFromStorage ? JSON.parse(boardFromStorage) : Array(9).fill(null)
+  })
 
-  const [turn, setTurn] = useState(TURNS.X)
+  const [turn, setTurn] = useState(() => {
+    const turnFromStorage = window.localStorage.getItem('turn')
+    return turnFromStorage ?? TURNS.X
+  })
+  
+  //null = no hay winner, false = empate
+  const [winner, setWinner] = useState(null) 
+
+  
+
+  const resetGame = () => {
+    setBoard(Array(9).fill(null))
+    setTurn(TURNS.X)
+    setWinner(null)
+
+    resetGameStorage()
+  }
+
 
   const updateBoard = (index) => {
     //Para q no se sobreescriban las posiciones
-    if (board[index]) return
+    if (board[index] || winner) return
     //actualizar el tablero
     const newBoard = [...board]
     newBoard[index] = turn
@@ -36,6 +41,19 @@ function App() {
     //cambiar el turno
     const newTurn = turn === TURNS.X ? TURNS.O : TURNS.X
     setTurn(newTurn)
+    //guardar aqui la partida
+    saveGameStorage({
+      board: newBoard,
+      turn: newTurn
+    })
+    //revisar quien es el ganador
+    const newWinner = checkWinnerFrom(newBoard)
+    if(newWinner) {
+      confetti()
+      setWinner(newWinner)
+    } else if(checkEndGame(newBoard)){
+      setWinner(false)
+    }
   }
 
   return (
@@ -43,14 +61,14 @@ function App() {
       <h1>TATETÍ</h1>
       <section className="game">
         {
-          board.map((_, index) => {
+          board.map((square, index) => {
             return (
               <Square
                 key={index}
                 index={index}
                 updateBoard={updateBoard}
                 >
-                  {board[index]}
+                  {square}
                 </Square>
             )
           })
@@ -64,6 +82,12 @@ function App() {
           {TURNS.O} 
         </Square>
       </section>
+
+      <WinnerModal resetGame={resetGame} winner={winner} />
+
+      <button onClick={resetGame}>Resetear Partida</button>  
+
+      
     </main>
   )
 }
