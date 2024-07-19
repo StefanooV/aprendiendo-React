@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 
 const CAT_PREFIX_IMAGE_URL = 'https://cataas.com'
 
-export function useCatImage( {fact} ) {
+export function useCatImage({ fact }) {
     const [imageUrl, setImageUrl] = useState()
   
     useEffect(() => {

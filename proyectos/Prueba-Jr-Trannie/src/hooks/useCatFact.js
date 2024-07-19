@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getRandomFact } from '../componentes/fact.js'
 
 export function useCatFact() {
     const [fact, setFact] = useState()
