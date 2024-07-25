@@ -1,15 +1,37 @@
-import responsiveWithMovies from '../mocks/with-results.json'
-import responsiveWithOutMovies from '../mocks/no-results.json'
+import { useState, useRef, useMemo } from 'react'
+import { searchMovies } from '../services/movies.js'
 
-export function useMovies () {
-    const movies = responsiveWithMovies.Search
+export function useMovies ({ search, sort }) {
+  const [movies, setMovies] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [, setError] = useState(null)
+  const previousSearch = useRef(search)
   
-    const mappedMovies = movies?.map(movie => ({
-      id: movie.imdbID,
-      title: movie.Title,
-      year: movie.Year,
-      image: movie.Poster,
-    }))
-  
-    return { movies: mappedMovies}
+  const getMovies = useMemo(() => {
+    return async () => {
+      if (search === previousSearch.current) return
+      
+      try {
+        setLoading(true)
+        setError(null)
+        previousSearch.current = search
+        const newMovies = await searchMovies({search})
+        setMovies(newMovies)
+
+      } catch(e) {
+        setError(e.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+  }, [search])
+
+  const sortedMovies = useMemo(() => {
+    return sort 
+    ? [...movies].sort((a, b) => a.title.localeCompare(b.title))
+    : movies
+
+  }, [sort, movies])
+
+  return { movies: sortedMovies, getMovies, loading }
 }
