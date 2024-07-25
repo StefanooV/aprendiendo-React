@@ -37,7 +37,7 @@ function useSearch () {
 function App() {
   const [sort, setSort] = useState(false)
   const {search, updateSearch, error} = useSearch()
-  const {movies, getMovies} = useMovies({search, sort})
+  const {movies, loading, getMovies} = useMovies({search, sort})
 
 
   const handleSubmit = (event) => {
