@@ -4,6 +4,7 @@
     justify-content: space-between;
     font-size: 12px;
     font-weight: 700;
+    font-size: 14px;
 }
 
 .filters > div {
@@ -15,4 +16,5 @@
 .filters option, .filters select {
     background-color: #242424;
     color: #fff;
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
