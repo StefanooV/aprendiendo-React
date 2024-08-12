@@ -1,4 +1,4 @@
-import { EVENTS } from "./consts"
+import { BUTTON, EVENTS } from "./consts"
 
 export function navigate (href) {
     window.history.pushState({}, '', href)
@@ -8,7 +8,7 @@ export function navigate (href) {
 
 export function Link ({ target, to, ...props }) {
     const handleClick = (evt) => {
-        const isMainEvent = evt.button === 0
+        const isMainEvent = evt.button === BUTTON.primary
         const isModifiedEvent = evt.metaKey || evt.altKey || evt.ctrlKey || evt.shiftKey
         const isManeagebleEvent = target === undefined || target === '_self'
 
