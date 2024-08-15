@@ -1,5 +1,6 @@
 import { EVENTS } from "./consts"
 import { useState, useEffect } from "react"
+import { match } from "path-to-regexp"
 
 export function Router ({ routes = [], defaultComponent: DefaultComponent = () => null }) {
     const [currentPath, setCurrentPath] = useState(window.location.pathname)
@@ -8,6 +9,7 @@ export function Router ({ routes = [], defaultComponent: DefaultComponent = () =
       const onLocationChange = () => {
         setCurrentPath(window.location.pathname)
       }
+
       window.addEventListener(EVENTS.PUSHSTATE, onLocationChange)
       window.addEventListener(EVENTS.POPSTATE, onLocationChange)
   
@@ -16,7 +18,22 @@ export function Router ({ routes = [], defaultComponent: DefaultComponent = () =
         window.removeEventListener(EVENTS.POPSTATE, onLocationChange)
       }
     }, [])
+
+    let routeParams = {}
   
-    const Page = routes.find(({ path }) => path === currentPath)?.Component
-    return Page ? <Page /> : <DefaultComponent />
+    const Page = routes.find(({ path }) =>{
+      if ( path === currentPath) return true
+
+      const matcherUrl = match(path, {decode: decodeURIComponent })
+      const matched = matcherUrl(currentPath)
+      if(!matched) return false
+
+      routeParams = matched.params
+      return true
+
+    })?.Component
+
+    return Page 
+      ? <Page routeParams={routeParams} /> 
+      : <DefaultComponent routeParams={routeParams}/>
 }
